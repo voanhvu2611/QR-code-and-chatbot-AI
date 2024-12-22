@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="productApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Lookup</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <style>
+        .container { max-width: 800px; margin: auto; padding: 20px; font-family: Arial, sans-serif; }
+        .product-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .product-image { max-width: 100%; height: auto; }
+        .details-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .details-table th, .details-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .details-table th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body ng-controller="productController">
+
+    <div class="container">
+        <h1>Tra cứu sản phẩm</h1>
+    
+        <div class="product-card" ng-if="product">
+            <h2>Tên sản phẩm: {{ product.name }}</h2>
+            <img ng-src="/dist/img/products/{{ product.image }}" alt="{{ product.name }}" class="product-image">
+            <p><strong>Giá:</strong> {{ product.price.toLocaleString() }} VNĐ</p>
+            <p><strong>Mô tả:</strong> {{ product.describe || 'Chưa có mô tả' }}</p>
+
+            <h3>Danh mục</h3>
+            
+            <p><strong>Tên danh mục:</strong> {{ product.category.name }}</p>
+
+            <h3>Thông tin sản xuất</h3>
+            <table class="details-table">
+                <tr>
+                    <th>Quốc gia</th>
+                    <td>{{ product.manufacturing.country }}</td>
+                </tr>
+                <tr>
+                    <th>Nhà sản xuất</th>
+                    <td>{{ product.manufacturing.manufacturer }}</td>
+                </tr>
+                <tr>
+                    <th>Địa chỉ</th>
+                    <td>{{ product.manufacturing.address }}</td>
+                </tr>
+                <tr>
+                    <th>Ngày sản xuất</th>
+                    <td>{{ product.manufacturing.manufacturingDate }}</td>
+                </tr>
+                <tr>
+                    <th>Số chứng nhận</th>
+                    <td>{{ product.manufacturing.certificationNumber }}</td>
+                </tr>
+                <tr>
+                    <th>Tiêu chuẩn chất lượng</th>
+                    <td>{{ product.manufacturing.qualityStandards }}</td>
+                </tr>
+            </table>
+
+            <h3>Thông tin vận chuyển</h3>
+            <table class="details-table">
+                <tr>
+                    <th>Bên nhập khẩu</th>
+                    <td>{{ product.shipping.importer }}</td>
+                </tr>
+                <tr>
+                    <th>Nhà phân phối</th>
+                    <td>{{ product.shipping.distributor }}</td>
+                </tr>
+                <tr>
+                    <th>Ngày nhập</th>
+                    <td>{{ product.shipping.importDate }}</td>
+                </tr>
+                <tr>
+                    <th>Hướng dẫn bảo quản</th>
+                    <td>{{ product.shipping.storageInstructions }}</td>
+                </tr>
+                <tr>
+                    <th>Phương thức vận chuyển</th>
+                    <td>{{ product.shipping.shippingMethod }}</td>
+                </tr>
+                <tr>
+                    <th>Điều kiện vận chuyển</th>
+                    <td>{{ product.shipping.shippingConditions }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div ng-if="error" class="error-message" style="color: red;">
+            {{ error }}
+        </div>
+    </div>
+
+    <script>
+        var app = angular.module('productApp', []);
+        app.controller('productController', ['$scope', '$http', '$location', function ($scope, $http, $location) {
+            // Lấy ID từ URL
+            var url = $location.absUrl(); // Lấy toàn bộ URL
+            var id = url.substring(url.lastIndexOf('/') + 1); // Trích xuất ID từ đường dẫn
+    
+            $scope.product = null;
+            $scope.error = null;
+    
+            // Gọi API để lấy thông tin sản phẩm
+            $scope.getProduct = function () {
+                $http.get('/rest/products/' + id)
+                    .then(function (response) {
+                        $scope.product = response.data; // Gán dữ liệu sản phẩm
+                        $scope.error = null;
+                    })
+                    .catch(function (error) {
+                        $scope.product = null;
+                        $scope.error = "Product not found or an error occurred.";
+                    });
+            };
+    
+            // Tự động gọi API khi tải trang
+            $scope.getProduct();
+        }]);
+    </script>    
+</body>
+</html>
